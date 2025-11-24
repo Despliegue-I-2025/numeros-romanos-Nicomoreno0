@@ -2,9 +2,12 @@
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Romanos a Arabigos
+const { romanToArabic, arabicToRoman } = require('./utils_temp');
+
+// Endpoint: Romanos → Arábigos
 app.get('/r2a', (req, res) => {
   const romanNumeral = req.query.roman;
+
   if (!romanNumeral) {
     return res.status(400).json({ error: 'Parametro roman requerido.' });
   }
@@ -17,32 +20,26 @@ app.get('/r2a', (req, res) => {
   return res.json({ arabic: arabicNumber });
 });
 
-// Arabigos a Romanos
+// Endpoint: Arábigos → Romanos
 app.get('/a2r', (req, res) => {
   const arabicNumber = parseInt(req.query.arabic, 10);
+
   if (isNaN(arabicNumber)) {
     return res.status(400).json({ error: 'Parametro arabic requerido.' });
   }
 
   const romanNumeral = arabicToRoman(arabicNumber);
   if (romanNumeral === null) {
-    return res.status(400).json({ error: 'Numero arabico invalido.' });
+    return res.status(400).json({ error: 'Numero arabico invalido (1-3999).' });
   }
 
   return res.json({ roman: romanNumeral });
 });
 
-function romanToArabic(roman) {
-}
-
-function arabicToRoman(arabic) {
-}
-
 if (require.main === module) {
   app.listen(PORT, () => {
-    console.log(`Servidor de tateti escuchando en el puerto ${PORT}`);
+    console.log(`Servidor escuchando en el puerto ${PORT}`);
   });
 }
-
 
 module.exports = { app, romanToArabic, arabicToRoman };
