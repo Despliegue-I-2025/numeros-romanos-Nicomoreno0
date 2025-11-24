@@ -1,33 +1,32 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Conversor de Números Romanos</title>
-  <link rel="stylesheet" href="styles.css">
-  <script>src= "script.js" </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conversor Arábigo - Romano</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <div class="container">
+        <h1>Conversor de Números</h1>
+        
+        <div class="converter-section">
+            <h2>Arábigo a Romano</h2>
+            <input type="number" id="arabicInput" placeholder="Ingresa número arábigo (1-3999)" min="1" max="3999">
+            <button onclick="convertToRoman()">Convertir a Romano</button>
+            <div id="romanResult" class="result"></div>
+        </div>
 
-  <h1>Conversor de Números Romanos ↔ Arábigos</h1>
+        <div class="converter-section">
+            <h2>Romano a Arábigo</h2>
+            <input type="text" id="romanInput" placeholder="Ingresa número romano" maxlength="15">
+            <button onclick="convertToArabic()">Convertir a Arábigo</button>
+            <div id="arabicResult" class="result"></div>
+        </div>
 
-  <div class="container">
-
-    <div class="card">
-      <h2>Romano ➜ Arábigo</h2>
-      <input id="romanInput" placeholder="Ej: XIV">
-      <button onclick="convertRoman()">Convertir</button>
-      <p id="romanResult"></p>
+        <div class="error-message" id="errorMessage"></div>
     </div>
 
-    <div class="card">
-      <h2>Arábigo ➜ Romano</h2>
-      <input id="arabicInput" type="number" placeholder="Ej: 18">
-      <button onclick="convertArabic()">Convertir</button>
-      <p id="arabicResult"></p>
-    </div>
-
-  </div>
-
-  <script src="script.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
