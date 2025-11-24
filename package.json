@@ -1,18 +1,21 @@
 {
-  "name": "roman-converter",
+  "name": "tateti-random",
   "version": "1.0.0",
-  "description": "Conversor de números arábigos a romanos y viceversa",
-  "main": "public/script.js",
+  "main": "tateti-random.js",
   "scripts": {
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
-  },
-  "devDependencies": {
-    "jest": "^29.0.0",
-    "supertest": "^6.3.4"
+    "start": "node tateti-random.js",
+    "test": "jest"
   },
   "dependencies": {
-    "@vercel/node": "^2.0.0"
+    "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
+  },
+  "jest": {
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "/.vercel/"
+    ]
   }
 }
