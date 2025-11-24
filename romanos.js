@@ -101,4 +101,8 @@ if (require.main === module) {
   });
 }
 
-module.exports = { romanToArabic, arabicToRoman };
+// Al final del archivo romanos.js
+module.exports = {
+  romanToArabic,
+  arabicToRoman
+};
