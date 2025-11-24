@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "builds": [
+    { "src": "api/r2a.js", "use": "@vercel/node" },
+    { "src": "api/a2r.js", "use": "@vercel/node" }
+  ],
+  "routes": [
+    { "src": "/r2a", "dest": "/api/r2a" },
+    { "src": "/a2r", "dest": "/api/a2r" }
+  ]
+}

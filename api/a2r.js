@@ -1,6 +1,6 @@
 const { arabicToRoman } = require('../romanos');
 
-module.exports = async (req, res) => {
+module.exports = (req, res) => {
   // Configuración de CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
