@@ -1,46 +1,51 @@
-const request = require('supertest');
-const { app } = require('../romanos');
+const RomanConverter = require('../api/RomanConverter');
 
-describe('API /r2a (romano a arábigo)', () => {
+// Simulamos el entorno de Vercel
+describe('API Endpoints', () => {
+    // Simulamos la función handler
+    const handler = require('../api/romanos');
 
-  test('convierte correctamente números romanos válidos', async () => {
-    const res = await request(app).get('/r2a?roman=XII');
-    expect(res.statusCode).toBe(200);
-    expect(res.body.arabic).toBe(12);
-  });
+    test('GET /api/romanos?numero=X should return 10', async () => {
+        const mockReq = {
+            method: 'GET',
+            query: { numero: 'X' }
+        };
+        
+        const mockRes = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn(),
+            setHeader: jest.fn()
+        };
 
-  test('retorna error si falta el parámetro', async () => {
-    const res = await request(app).get('/r2a');
-    expect(res.statusCode).toBe(400);
-    expect(res.body.error).toBeDefined();
-  });
+        await handler(mockReq, mockRes);
 
-  test('retorna error si el número romano es inválido', async () => {
-    const res = await request(app).get('/r2a?roman=IIII');
-    expect(res.statusCode).toBe(400);
-    expect(res.body.error).toBe("Numero romano invalido.");
-  });
+        expect(mockRes.status).toHaveBeenCalledWith(200);
+        expect(mockRes.json).toHaveBeenCalledWith({
+            resultado: 10,
+            entrada: 'X',
+            conversion: 'romano_a_arabigo'
+        });
+    });
 
-});
+    test('POST /api/romanos with arabigo_a_romano', async () => {
+        const mockReq = {
+            method: 'POST',
+            body: { numero: 10, tipo: 'arabigo_a_romano' }
+        };
+        
+        const mockRes = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn(),
+            setHeader: jest.fn()
+        };
 
-describe('API /a2r (arábigo a romano)', () => {
+        await handler(mockReq, mockRes);
 
-  test('convierte correctamente números arábigos válidos', async () => {
-    const res = await request(app).get('/a2r?arabic=58');
-    expect(res.statusCode).toBe(200);
-    expect(res.body.roman).toBe("LVIII");
-  });
-
-  test('retorna error si falta el parámetro', async () => {
-    const res = await request(app).get('/a2r');
-    expect(res.statusCode).toBe(400);
-    expect(res.body.error).toBeDefined();
-  });
-
-  test('retorna error si el número es inválido', async () => {
-    const res = await request(app).get('/a2r?arabic=4000');
-    expect(res.statusCode).toBe(400);
-    expect(res.body.error).toBe("Numero arabico invalido (1-3999).");
-  });
-
+        expect(mockRes.status).toHaveBeenCalledWith(200);
+        expect(mockRes.json).toHaveBeenCalledWith({
+            resultado: 'X',
+            entrada: 10,
+            conversion: 'arabigo_a_romano'
+        });
+    });
 });

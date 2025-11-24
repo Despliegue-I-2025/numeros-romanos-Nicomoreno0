@@ -139,3 +139,76 @@ document.getElementById('romanInput').addEventListener('keypress', function(e) {
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = { RomanConverter };
 }
+
+
+
+// En public/script.js, actualiza las funciones para usar la API:
+
+async function convertToRoman() {
+    hideError();
+    const arabicInput = document.getElementById('arabicInput');
+    const resultDiv = document.getElementById('romanResult');
+    
+    try {
+        const number = parseInt(arabicInput.value);
+        
+        if (isNaN(number)) {
+            throw new Error('Por favor ingresa un número válido');
+        }
+
+        // Usar la API
+        const response = await fetch('/api/romanos', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                numero: number,
+                tipo: 'arabigo_a_romano'
+            })
+        });
+
+        const data = await response.json();
+        
+        if (!response.ok) {
+            throw new Error(data.error);
+        }
+
+        resultDiv.textContent = data.resultado;
+        resultDiv.style.color = '#333';
+        
+    } catch (error) {
+        showError(error.message);
+        resultDiv.textContent = '';
+    }
+}
+
+async function convertToArabic() {
+    hideError();
+    const romanInput = document.getElementById('romanInput');
+    const resultDiv = document.getElementById('arabicResult');
+    
+    try {
+        const roman = romanInput.value.trim();
+        
+        if (!roman) {
+            throw new Error('Por favor ingresa un número romano');
+        }
+
+        // Usar la API
+        const response = await fetch(`/api/romanos?numero=${encodeURIComponent(roman)}`);
+        const data = await response.json();
+        
+        if (!response.ok) {
+            throw new Error(data.error);
+        }
+
+        resultDiv.textContent = data.resultado;
+        resultDiv.style.color = '#333';
+        
+    } catch (error) {
+        showError(error.message);
+        resultDiv.textContent = '';
+    }
+}
+
