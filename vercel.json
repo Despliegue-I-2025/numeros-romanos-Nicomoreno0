@@ -3,7 +3,7 @@
   "builds": [
     { "src": "api/r2a.js", "use": "@vercel/node" },
     { "src": "api/a2r.js", "use": "@vercel/node" },
-    { "src": "public/**", "use": "@vercel/static" }
+    { "src": "public/index.html", "use": "@vercel/static" }
   ],
   "routes": [
     { "src": "/r2a", "dest": "/api/r2a" },
