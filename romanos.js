@@ -1,12 +1,41 @@
 ﻿const express = require('express');
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3000;
 
 // Middleware para parsear JSON
 app.use(express.json());
 app.use(express.static('public'));
 
-// Funciones de conversión
+// Romanos a Arábigos
+app.get('/r2a', (req, res) => {
+  const romanNumeral = req.query.roman?.toUpperCase();
+  if (!romanNumeral) {
+    return res.status(400).json({ error: 'Parámetro "roman" requerido.' });
+  }
+
+  const arabicNumber = romanToArabic(romanNumeral);
+  if (arabicNumber === null) {
+    return res.status(400).json({ error: 'Número romano inválido.' });
+  }
+
+  return res.json({ arabic: arabicNumber });
+});
+
+// Arábigos a Romanos
+app.get('/a2r', (req, res) => {
+  const arabicNumber = parseInt(req.query.arabic, 10);
+  if (isNaN(arabicNumber) || !Number.isInteger(arabicNumber) || arabicNumber <= 0) {
+    return res.status(400).json({ error: 'Parámetro "arabic" debe ser un número entero positivo.' });
+  }
+
+  const romanNumeral = arabicToRoman(arabicNumber);
+  if (romanNumeral === null) {
+    return res.status(400).json({ error: 'Número arábigo inválido. Debe estar entre 1 y 3999.' });
+  }
+
+  return res.json({ roman: romanNumeral });
+});
+
 function romanToArabic(roman) {
   if (roman === '') return undefined;
   const romanValues = { I: 1, V: 5, X: 10, L: 50, C: 100, D: 500, M: 1000 };
@@ -66,54 +95,9 @@ function arabicToRoman(arabic) {
   return result;
 }
 
-// Romanos a Arábigos
-app.get('/r2a', (req, res) => {
-  try {
-    const romanNumeral = req.query.roman?.toUpperCase();
-    
-    if (!romanNumeral) {
-      return res.status(400).json({ error: 'Parámetro "roman" requerido.' });
-    }
-
-    const arabicNumber = romanToArabic(romanNumeral);
-    
-    if (arabicNumber === null || arabicNumber === undefined) {
-      return res.status(400).json({ error: 'Número romano inválido.' });
-    }
-
-    return res.json({ arabic: arabicNumber });
-  } catch (error) {
-    console.error('Error en /r2a:', error);
-    return res.status(500).json({ error: 'Error interno del servidor' });
-  }
-});
-
-// Arábigos a Romanos
-app.get('/a2r', (req, res) => {
-  try {
-    const arabicNumber = parseInt(req.query.arabic, 10);
-    
-    if (isNaN(arabicNumber) || !Number.isInteger(arabicNumber) || arabicNumber <= 0) {
-      return res.status(400).json({ error: 'Parámetro "arabic" debe ser un número entero positivo.' });
-    }
-
-    const romanNumeral = arabicToRoman(arabicNumber);
-    
-    if (romanNumeral === null) {
-      return res.status(400).json({ error: 'Número arábigo inválido. Debe estar entre 1 y 3999.' });
-    }
-
-    return res.json({ roman: romanNumeral });
-  } catch (error) {
-    console.error('Error en /a2r:', error);
-    return res.status(500).json({ error: 'Error interno del servidor' });
-  }
-});
-
-// Iniciar servidor solo si se ejecuta directamente
 if (require.main === module) {
   app.listen(PORT, () => {
-    console.log(`Servidor corriendo en http://localhost:${PORT}`);
+    console.log(`Servidor de conversión de números romanos escuchando en el puerto ${PORT}`);
   });
 }
 
