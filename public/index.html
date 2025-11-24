@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conversor de Números Romanos</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --primary: #10B981;    /* Verde esmeralda */
+            --secondary: #059669;  /* Verde más oscuro */
+            --accent: #06B6D4;    /* Azul turquesa */
+            --dark: #1F2937;      /* Gris oscuro */
+            --light: #F9FAFB;     /* Gris muy claro */
+            --success: #10B981;   /* Verde esmeralda */
+            --error: #EF4444;     /* Rojo */
+            --card-bg: rgba(255, 255, 255, 0.9);
+            --glass-effect: rgba(255, 255, 255, 0.25);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, #D1FAE5 0%, #A7F3D0 100%);
+            min-height: 100vh;
+            padding: 2rem;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            color: var(--dark);
+        }
+
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            font-weight: 400;
+            color: var(--dark);
+        }
+
+        .converter-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            justify-content: center;
+            align-items: flex-start;
+            perspective: 1000px;
+        }
+
+        .converter-box {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            width: 100%;
+            max-width: 500px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 15px 35px rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .converter-box:hover {
+            transform: translateY(-10px) rotateX(5deg);
+            box-shadow: 0 20px 40px rgba(16, 185, 129, 0.15);
+        }
+
+        .converter-box h2 {
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            text-align: center;
+            font-size: 1.8rem;
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .converter-box h2::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background: var(--accent);
+            border-radius: 3px;
+        }
+
+        .input-group {
+            margin-bottom: 1.8rem;
+            position: relative;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 0.8rem;
+            color: var(--dark);
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .input-field {
+            position: relative;
+            width: 100%;
+        }
+
+        .input-field input {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #E5E7EB;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            font-family: 'Montserrat', sans-serif;
+            background: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        .input-field input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.3);
+        }
+
+        .input-field i {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--primary);
+            font-size: 1.2rem;
+        }
+
+        .button {
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 0.5rem;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+
+        .button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 20px rgba(16, 185, 129, 0.4);
+        }
+
+        .button:active {
+            transform: translateY(0);
+        }
+
+        .button::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                45deg,
+                rgba(255,255,255,0.2) 0%,
+                rgba(255,255,255,0) 50%,
+                rgba(255,255,255,0.2) 100%
+            );
+            transform: translateX(-100%);
+            transition: transform 0.6s ease;
+        }
+
+        .button:hover::after {
+            transform: translateX(100%);
+        }
+
+        .result {
+            margin-top: 2rem;
+            padding: 1.8rem;
+            border-radius: 15px;
+            text-align: center;
+            font-size: 1.8rem;
+            font-weight: 700;
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.6);
+            border: 2px dashed rgba(16, 185, 129, 0.3);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .result::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(
+                45deg,
+                transparent 45%,
+                rgba(255,255,255,0.3) 48%,
+                rgba(255,255,255,0.3) 52%,
+                transparent 55%
+            );
+            background-size: 200% 200%;
+            animation: shine 3s infinite;
+        }
+
+        @keyframes shine {
+            0% { background-position: -100% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        .result.success {
+            background: rgba(16, 185, 129, 0.1);
+            border-color: var(--success);
+            color: var(--success);
+        }
+
+        .error-message {
+            color: var(--error);
+            font-size: 0.95rem;
+            margin-top: 0.8rem;
+            min-height: 20px;
+            text-align: center;
+            display: none;
+            font-weight: 500;
+        }
+
+        .swap-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 1rem 0;
+            width: 100%;
+        }
+
+        .swap-button {
+            background: linear-gradient(45deg, var(--accent), #0D9488);
+            color: white;
+            border: none;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 10px 25px rgba(6, 182, 212, 0.4);
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 1;
+            font-size: 1.5rem;
+        }
+
+        .swap-button:hover {
+            transform: rotate(180deg) scale(1.1);
+            box-shadow: 0 15px 30px rgba(6, 182, 212, 0.5);
+        }
+
+        .swap-button::before {
+            content: '';
+            position: absolute;
+            top: -5px;
+            left: -5px;
+            right: -5px;
+            bottom: -5px;
+            background: linear-gradient(45deg, var(--accent), #0D9488, var(--accent));
+            z-index: -1;
+            border-radius: 50%;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .swap-button:hover::before {
+            opacity: 1;
+            animation: rotate 1.5s linear infinite;
+        }
+
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .history {
+            margin-top: 4rem;
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 15px 35px rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .history h3 {
+            color: var(--primary);
+            margin-bottom: 1.8rem;
+            text-align: center;
+            font-size: 1.8rem;
+            position: relative;
+            padding-bottom: 1rem;
+        }
+
+        .history h3::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 3px;
+            background: var(--accent);
+            border-radius: 3px;
+        }
+
+        .history-list {
+            list-style: none;
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 0.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .history-item {
+            padding: 1.2rem 1.5rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+            border-radius: 10px;
+            margin-bottom: 0.5rem;
+            background: rgba(255, 255, 255, 0.6);
+        }
+
+        .history-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .history-item:hover {
+            transform: translateX(10px);
+            background: white;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .history-item span {
+            font-weight: 600;
+            color: var(--dark);
+            font-size: 1.1rem;
+        }
+
+        .history-item .conversion {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .history-item .conversion i {
+            color: var(--primary);
+            font-size: 1.2rem;
+        }
+
+        .history-item small {
+            color: #4B5563;
+            font-size: 0.9rem;
+        }
+
+        /* Animaciones */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .converter-box, .history {
+            animation: fadeIn 0.6s ease-out forwards;
+        }
+
+        .converter-box:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .history {
+            animation-delay: 0.4s;
+        }
+
+        /* Scrollbar personalizada */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--secondary);
+        }
+
+        /* Efecto de partículas */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            background: rgba(16, 185, 129, 0.3);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            h1 {
+                font-size: 2.2rem;
+            }
+
+            .subtitle {
+                font-size: 1rem;
+            }
+
+            .converter-container {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .converter-box {
+                width: 100%;
+                padding: 1.5rem;
+            }
+
+            .result {
+                font-size: 1.5rem;
+                padding: 1.5rem 1rem;
+                min-height: 90px;
+            }
+
+            .swap-button {
+                width: 60px;
+                height: 60px;
+                font-size: 1.3rem;
+            }
+
+            .history {
+                margin-top: 2rem;
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="particles" id="particles"></div>
+    
+    <div class="container">
+        <header>
+            <h1>Conversor de Números Romanos</h1>
+            <p class="subtitle">Transforma entre números arábigos y romanos de forma sencilla</p>
+        </header>
+
+        <div class="converter-container">
+            <div class="converter-box">
+                <h2>Arábigo a Romano</h2>
+                <div class="input-group">
+                    <label for="arabicInput">Número Arábigo</label>
+                    <div class="input-field">
+                        <input type="number" id="arabicInput" placeholder="Ej: 42" min="1" max="3999">
+                        <i class="fas fa-hashtag"></i>
+                    </div>
+                    <div id="arabicError" class="error-message"></div>
+                </div>
+                <button id="toRomanBtn" class="button">
+                    <i class="fas fa-exchange-alt"></i> Convertir a Romano
+                </button>
+                <div id="romanResult" class="result">Resultado</div>
+            </div>
+
+            <div class="swap-container">
+                <button id="swapBtn" class="swap-button" title="Intercambiar">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+            </div>
+
+            <div class="converter-box">
+                <h2>Romano a Arábigo</h2>
+                <div class="input-group">
+                    <label for="romanInput">Número Romano</label>
+                    <div class="input-field">
+                        <input type="text" id="romanInput" placeholder="Ej: XLII" style="text-transform: uppercase">
+                        <i class="fas fa-font"></i>
+                    </div>
+                    <div id="romanError" class="error-message"></div>
+                </div>
+                <button id="toArabicBtn" class="button">
+                    <i class="fas fa-exchange-alt"></i> Convertir a Arábigo
+                </button>
+                <div id="arabicResult" class="result">Resultado</div>
+            </div>
+        </div>
+
+        <div class="history">
+            <h3>Historial de Conversiones</h3>
+            <ul id="historyList" class="history-list">
+                <!-- Las conversiones se agregarán aquí dinámicamente -->
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Elementos del DOM
+        const arabicInput = document.getElementById('arabicInput');
+        const romanInput = document.getElementById('romanInput');
+        const toRomanBtn = document.getElementById('toRomanBtn');
+        const toArabicBtn = document.getElementById('toArabicBtn');
+        const swapBtn = document.getElementById('swapBtn');
+        const romanResult = document.getElementById('romanResult');
+        const arabicResult = document.getElementById('arabicResult');
+        const arabicError = document.getElementById('arabicError');
+        const romanError = document.getElementById('romanError');
+        const historyList = document.getElementById('historyList');
+        const particlesContainer = document.getElementById('particles');
+
+        // Historial de conversiones
+        let history = JSON.parse(localStorage.getItem('conversionHistory')) || [];
+
+        // Crear partículas
+        function createParticles() {
+            const particlesCount = 30;
+            for (let i = 0; i < particlesCount; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                
+                // Tamaño aleatorio entre 2px y 6px
+                const size = Math.random() * 4 + 2;
+                
+                // Posición aleatoria
+                const posX = Math.random() * 100;
+                const posY = Math.random() * 100;
+                
+                // Duración de la animación aleatoria
+                const duration = Math.random() * 30 + 20;
+                const delay = Math.random() * -20;
+                
+                // Aplicar estilos
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                particle.style.left = `${posX}%`;
+                particle.style.top = `${posY}%`;
+                particle.style.opacity = Math.random() * 0.6 + 0.2;
+                particle.style.animation = `float ${duration}s linear ${delay}s infinite`;
+                
+                // Agregar al contenedor
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // Animación de flotación
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes float {
+                0% { transform: translateY(0) translateX(0); opacity: 0.2; }
+                25% { transform: translateY(-20px) translateX(10px); opacity: 0.6; }
+                50% { transform: translateY(-40px) translateX(0); opacity: 0.8; }
+                75% { transform: translateY(-20px) translateX(-10px); opacity: 0.6; }
+                100% { transform: translateY(0) translateX(0); opacity: 0.2; }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Cargar historial al iniciar
+        function loadHistory() {
+            historyList.innerHTML = history.length > 0 ? '' : '<li style="text-align: center; color: #6B7280; padding: 1rem;">No hay conversiones recientes</li>';
+            
+            history.slice().reverse().forEach(item => {
+                const li = document.createElement('li');
+                li.className = 'history-item';
+                li.innerHTML = `
+                    <div class="conversion">
+                        <span>${item.from}</span>
+                        <i class="fas fa-arrow-right"></i>
+                        <span>${item.to}</span>
+                    </div>
+                    <small>${new Date(item.timestamp).toLocaleString()}</small>
+                `;
+                historyList.appendChild(li);
+            });
+        }
+
+        // Guardar en el historial
+        function saveToHistory(from, to) {
+            const conversion = {
+                from,
+                to,
+                timestamp: new Date().toISOString()
+            };
+            history.push(conversion);
+            if (history.length > 10) history.shift(); // Mantener solo las últimas 10 conversiones
+            localStorage.setItem('conversionHistory', JSON.stringify(history));
+            loadHistory();
+        }
+
+        // Mostrar error
+        function showError(message, element) {
+            element.textContent = message;
+            element.style.display = 'block';
+            setTimeout(() => {
+                element.style.display = 'none';
+            }, 3000);
+        }
+
+        // Convertir a Romano
+        async function convertToRoman() {
+            const number = parseInt(arabicInput.value);
+            
+            if (isNaN(number) || number < 1 || number > 3999) {
+                arabicError.textContent = 'Por favor ingrese un número entre 1 y 3999';
+                arabicError.style.display = 'block';
+                romanResult.textContent = 'Resultado';
+                romanResult.className = 'result';
+                return;
+            }
+
+            try {
+                const response = await fetch(`/a2r?arabic=${number}`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    romanResult.textContent = data.roman;
+                    romanResult.className = 'result success';
+                    arabicError.style.display = 'none';
+                    saveToHistory(number.toString(), data.roman);
+                } else {
+                    throw new Error(data.error || 'Error en la conversión');
+                }
+            } catch (error) {
+                showError('Error al conectar con el servidor', arabicError);
+                console.error('Error:', error);
+            }
+        }
+
+        // Convertir a Arábigo
+        async function convertToArabic() {
+            const romanNumeral = romanInput.value.trim().toUpperCase();
+            
+            if (!romanNumeral) {
+                romanError.textContent = 'Por favor ingrese un número romano';
+                romanError.style.display = 'block';
+                arabicResult.textContent = 'Resultado';
+                arabicResult.className = 'result';
+                return;
+            }
+
+            try {
+                const response = await fetch(`/r2a?roman=${encodeURIComponent(romanNumeral)}`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    arabicResult.textContent = data.arabic;
+                    arabicResult.className = 'result success';
+                    romanError.style.display = 'none';
+                    saveToHistory(romanNumeral, data.arabic.toString());
+                } else {
+                    throw new Error(data.error || 'Número romano inválido');
+                }
+            } catch (error) {
+                showError(error.message || 'Error al conectar con el servidor', romanError);
+                console.error('Error:', error);
+            }
+        }
+
+        // Intercambiar valores
+        function swapValues() {
+            const temp = arabicInput.value;
+            arabicInput.value = romanInput.value;
+            romanInput.value = temp;
+            
+            // Convertir automáticamente al intercambiar
+            if (arabicInput.value && !romanInput.value) {
+                convertToRoman();
+            } else if (romanInput.value && !arabicInput.value) {
+                convertToArabic();
+            } else if (arabicInput.value && romanInput.value) {
+                // Si ambos campos tienen valor, intercambiar resultados
+                const tempResult = arabicResult.textContent;
+                arabicResult.textContent = romanResult.textContent;
+                romanResult.textContent = tempResult;
+            }
+        }
+
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            createParticles();
+            loadHistory();
+        });
+
+        toRomanBtn.addEventListener('click', convertToRoman);
+        toArabicBtn.addEventListener('click', convertToArabic);
+        swapBtn.addEventListener('click', swapValues);
+
+        // Permitir presionar Enter en los campos de entrada
+        arabicInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                convertToRoman();
+            }
+        });
+
+        romanInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                convertToArabic();
+            }
+        });
+
+        // Efecto de hover en los campos de entrada
+        const inputs = document.querySelectorAll('input');
+        inputs.forEach(input => {
+            input.addEventListener('focus', () => {
+                input.parentElement.style.transform = 'scale(1.02)';
+            });
+            
+            input.addEventListener('blur', () => {
+                input.parentElement.style.transform = 'scale(1)';
+            });
+        });
+    </script>
+</body>
+</html>
