@@ -10,7 +10,7 @@
   },
   "devDependencies": {
     "jest": "^29.0.0",
-    "supertest": "^6.3.3"
+    "supertest": "^6.3.4"
   },
   "dependencies": {
     "@vercel/node": "^2.0.0"
