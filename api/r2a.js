@@ -11,66 +11,52 @@ module.exports = function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { roman } = req.query;
+  const { arabic } = req.query;
 
-  if (!roman) {
-    return res.status(400).json({ error: 'Missing roman parameter' });
+  if (!arabic) {
+    return res.status(400).json({ error: 'Missing arabic parameter' });
   }
 
-  const romanUpper = roman.toUpperCase();
-
-  // Validar solo caracteres romanos válidos
-  const validRomanRegex = /^[MDCLXVI]+$/;
-  if (!validRomanRegex.test(romanUpper)) {
-    return res.status(400).json({ error: 'Invalid roman numeral format' });
+  // Validar que sea completamente numérico
+  if (!/^\d+$/.test(arabic)) {
+    return res.status(400).json({ error: 'Invalid arabic number format' });
   }
 
-  // Validar patrón romano correcto
-  if (!isValidRoman(romanUpper)) {
-    return res.status(400).json({ error: 'Invalid roman numeral' });
+  const num = parseInt(arabic, 10);
+
+  if (isNaN(num) || num < 1 || num > 3999) {
+    return res.status(400).json({ error: 'Invalid arabic number (must be 1-3999)' });
   }
 
-  const arabic = romanToArabic(romanUpper);
+  const roman = arabicToRoman(num);
 
-  if (arabic === 0 || arabic > 3999) {
-    return res.status(400).json({ error: 'Invalid roman numeral' });
-  }
-
-  return res.status(200).json({ arabic });
+  return res.status(200).json({ roman });
 };
 
-function isValidRoman(roman) {
-  // Valida repeticiones y sustracciones correctas
-  const validPattern =
-    /^M{0,3}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$/;
+function arabicToRoman(num) {
+  const values = [
+    [1000, 'M'],
+    [900, 'CM'],
+    [500, 'D'],
+    [400, 'CD'],
+    [100, 'C'],
+    [90, 'XC'],
+    [50, 'L'],
+    [40, 'XL'],
+    [10, 'X'],
+    [9, 'IX'],
+    [5, 'V'],
+    [4, 'IV'],
+    [1, 'I']
+  ];
 
-  return validPattern.test(roman);
-}
+  let result = '';
 
-function romanToArabic(roman) {
-  const values = {
-    M: 1000,
-    D: 500,
-    C: 100,
-    L: 50,
-    X: 10,
-    V: 5,
-    I: 1
-  };
-
-  let result = 0;
-  let prevValue = 0;
-
-  for (let i = roman.length - 1; i >= 0; i--) {
-    const currentValue = values[roman[i]];
-
-    if (currentValue < prevValue) {
-      result -= currentValue;
-    } else {
-      result += currentValue;
+  for (let i = 0; i < values.length; i++) {
+    while (num >= values[i][0]) {
+      result += values[i][1];
+      num -= values[i][0];
     }
-
-    prevValue = currentValue;
   }
 
   return result;
