@@ -572,7 +572,10 @@
         // Historial de conversiones
         let history = JSON.parse(localStorage.getItem('conversionHistory')) || [];
 
-        // Crear partículas
+
+        const API_BASE_URL = 'https://numeros-romanos-nicomoreno0-6sgp4dcf8-nicolas-projects-8802edcf.vercel.app';
+
+
         function createParticles() {
             const particlesCount = 30;
             for (let i = 0; i < particlesCount; i++) {
@@ -656,67 +659,66 @@
                 element.style.display = 'none';
             }, 3000);
         }
-
-        // Convertir a Romano
-        async function convertToRoman() {
-            const number = parseInt(arabicInput.value);
-            
-            if (isNaN(number) || number < 1 || number > 3999) {
-                arabicError.textContent = 'Por favor ingrese un número entre 1 y 3999';
-                arabicError.style.display = 'block';
-                romanResult.textContent = 'Resultado';
-                romanResult.className = 'result';
-                return;
-            }
-
-            try {
-                const response = await fetch(`/a2r?arabic=${number}`);
-                const data = await response.json();
-                
-                if (response.ok) {
-                    romanResult.textContent = data.roman;
-                    romanResult.className = 'result success';
-                    arabicError.style.display = 'none';
-                    saveToHistory(number.toString(), data.roman);
-                } else {
-                    throw new Error(data.error || 'Error en la conversión');
-                }
-            } catch (error) {
-                showError('Error al conectar con el servidor', arabicError);
-                console.error('Error:', error);
-            }
+// Función para convertir de arábigo a romano
+function arabicToRoman(num) {
+    if (isNaN(num) || num < 1 || num > 3999) return null;
+    
+    const romanNumerals = [
+        { value: 1000, symbol: 'M' },
+        { value: 900, symbol: 'CM' },
+        { value: 500, symbol: 'D' },
+        { value: 400, symbol: 'CD' },
+        { value: 100, symbol: 'C' },
+        { value: 90, symbol: 'XC' },
+        { value: 50, symbol: 'L' },
+        { value: 40, symbol: 'XL' },
+        { value: 10, symbol: 'X' },
+        { value: 9, symbol: 'IX' },
+        { value: 5, symbol: 'V' },
+        { value: 4, symbol: 'IV' },
+        { value: 1, symbol: 'I' }
+    ];
+    
+    let result = '';
+    for (let i = 0; i < romanNumerals.length; i++) {
+        while (num >= romanNumerals[i].value) {
+            result += romanNumerals[i].symbol;
+            num -= romanNumerals[i].value;
         }
+    }
+    return result;
+}
 
-        // Convertir a Arábigo
-        async function convertToArabic() {
-            const romanNumeral = romanInput.value.trim().toUpperCase();
-            
-            if (!romanNumeral) {
-                romanError.textContent = 'Por favor ingrese un número romano';
-                romanError.style.display = 'block';
-                arabicResult.textContent = 'Resultado';
-                arabicResult.className = 'result';
-                return;
-            }
+// Convertir a Romano
+function convertToRoman() {
+    const number = parseInt(arabicInput.value);
+    
+    if (isNaN(number) || number < 1 || number > 3999) {
+        arabicError.textContent = 'Por favor ingrese un número entre 1 y 3999';
+        arabicError.style.display = 'block';
+        romanResult.textContent = 'Resultado';
+        romanResult.className = 'result';
+        return;
+    }
 
-            try {
-                const response = await fetch(`/r2a?roman=${encodeURIComponent(romanNumeral)}`);
-                const data = await response.json();
-                
-                if (response.ok) {
-                    arabicResult.textContent = data.arabic;
-                    arabicResult.className = 'result success';
-                    romanError.style.display = 'none';
-                    saveToHistory(romanNumeral, data.arabic.toString());
-                } else {
-                    throw new Error(data.error || 'Número romano inválido');
-                }
-            } catch (error) {
-                showError(error.message || 'Error al conectar con el servidor', romanError);
-                console.error('Error:', error);
-            }
+    try {
+        const roman = arabicToRoman(number);
+        
+        if (roman) {
+            romanResult.textContent = roman;
+            romanResult.className = 'result success';
+            arabicError.style.display = 'none';
+            saveToHistory(number.toString(), roman);
+        } else {
+            throw new Error('Error en la conversión');
         }
-
+    } catch (error) {
+        console.error('Error en convertToRoman:', error);
+        showError('Error al convertir el número. Intente nuevamente.', arabicError);
+        romanResult.textContent = 'Error';
+        romanResult.className = 'result error';
+    }
+}
         // Intercambiar valores
         function swapValues() {
             const temp = arabicInput.value;
@@ -770,6 +772,76 @@
                 input.parentElement.style.transform = 'scale(1)';
             });
         });
+        // Función para validar un número romano
+function isValidRoman(roman) {
+    const romanRegex = /^M{0,3}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$/;
+    return romanRegex.test(roman);
+}
+
+// Función para convertir de romano a arábigo
+function romanToArabic(roman) {
+    if (!isValidRoman(roman)) return null;
+    
+    const romanValues = {
+        'I': 1,
+        'V': 5,
+        'X': 10,
+        'L': 50,
+        'C': 100,
+        'D': 500,
+        'M': 1000
+    };
+    
+    let result = 0;
+    let previousValue = 0;
+    
+    for (let i = roman.length - 1; i >= 0; i--) {
+        const currentValue = romanValues[roman[i]];
+        if (currentValue >= previousValue) {
+            result += currentValue;
+        } else {
+            result -= currentValue;
+        }
+        previousValue = currentValue;
+    }
+    
+    return result;
+}
+
+// Convertir a Arábigo
+function convertToArabic() {
+    const romanNumeral = romanInput.value.trim().toUpperCase();
+    
+    if (!romanNumeral) {
+        romanError.textContent = 'Por favor ingrese un número romano';
+        romanError.style.display = 'block';
+        arabicResult.textContent = 'Resultado';
+        arabicResult.className = 'result';
+        return;
+    }
+
+    try {
+        if (!isValidRoman(romanNumeral)) {
+            throw new Error('Número romano inválido');
+        }
+        
+        const arabic = romanToArabic(romanNumeral);
+        
+        if (arabic !== null) {
+            arabicResult.textContent = arabic;
+            arabicResult.className = 'result success';
+            romanError.style.display = 'none';
+            saveToHistory(romanNumeral, arabic.toString());
+        } else {
+            throw new Error('Número romano inválido');
+        }
+    } catch (error) {
+        console.error('Error en convertToArabic:', error);
+        showError(error.message || 'Error al convertir el número', romanError);
+        arabicResult.textContent = 'Error';
+        arabicResult.className = 'result error';
+    }
+}
     </script>
 </body>
 </html>
