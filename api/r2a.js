@@ -17,52 +17,43 @@ module.exports = function handler(req, res) {
     return res.status(400).json({ error: "Missing roman parameter" });
   }
 
-  // Validar solo letras I V X L C D M (mayúsculas)
-  if (!/^[IVXLCDM]+$/.test(roman)) {
+  const upper = roman.toUpperCase();
+
+  // Regex oficial para validar romanos (1–3999)
+  const validRoman =
+    /^(M{0,3})(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$/;
+
+  if (!validRoman.test(upper)) {
     return res.status(400).json({ error: "Invalid roman numeral format" });
   }
 
-  const value = romanToArabic(roman);
-
-  // Si la función retorna null → formato inválido (como IIX, VV, etc.)
-  if (value === null) {
-    return res.status(400).json({ error: "Invalid roman numeral" });
-  }
-
-  return res.status(200).json({ arabic: value });
+  return res.status(200).json({ arabic: romanToArabic(upper) });
 };
 
 function romanToArabic(roman) {
-  const map = { I:1, V:5, X:10, L:50, C:100, D:500, M:1000 };
-  let result = 0;
-  let prev = 0;
-
-  for (let i = roman.length - 1; i >= 0; i--) {
-    const current = map[roman[i]];
-
-    if (!current) return null; 
-
-    if (current < prev) {
-      // Resta
-      // pero validar que sea una resta válida
-      if (!isValidSubtractive(roman[i], roman[i+1])) return null;
-      result -= current;
-    } else {
-      result += current;
-    }
-
-    prev = current;
-  }
-
-  return result;
-}
-
-function isValidSubtractive(a, b) {
-  const valid = {
-    I: ['V','X'],
-    X: ['L','C'],
-    C: ['D','M']
+  const values = {
+    M: 1000,
+    D: 500,
+    C: 100,
+    L: 50,
+    X: 10,
+    V: 5,
+    I: 1
   };
 
-  return valid[a] ? valid[a].includes(b) : false;
+  let total = 0;
+
+  for (let i = 0; i < roman.length; i++) {
+    const curr = values[roman[i]];
+    const next = values[roman[i + 1]];
+
+    if (next && next > curr) {
+      total += next - curr;
+      i++; 
+    } else {
+      total += curr;
+    }
+  }
+
+  return total;
 }
