@@ -11,45 +11,58 @@ module.exports = function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const { arabic } = req.query;
+  const { roman } = req.query;
 
-  // Verificar que exista
-  if (!arabic) {
-    return res.status(400).json({ error: "Missing arabic parameter" });
+  if (!roman) {
+    return res.status(400).json({ error: "Missing roman parameter" });
   }
 
-  // Validar que sea SOLO dígitos → RECHAZA: 12abc, abc, -5, 12.5
-  if (!/^\d+$/.test(arabic)) {
-    return res.status(400).json({ error: "Invalid arabic number format" });
+  // Validar solo letras I V X L C D M (mayúsculas)
+  if (!/^[IVXLCDM]+$/.test(roman)) {
+    return res.status(400).json({ error: "Invalid roman numeral format" });
   }
 
-  const num = parseInt(arabic, 10);
+  const value = romanToArabic(roman);
 
-  // Validar rango
-  if (num < 1 || num > 3999) {
-    return res.status(400).json({ error: "Invalid arabic number (must be 1-3999)" });
+  // Si la función retorna null → formato inválido (como IIX, VV, etc.)
+  if (value === null) {
+    return res.status(400).json({ error: "Invalid roman numeral" });
   }
 
-  const roman = arabicToRoman(num);
-  return res.status(200).json({ roman });
+  return res.status(200).json({ arabic: value });
 };
 
-function arabicToRoman(num) {
-  const values = [
-    [1000, "M"], [900, "CM"], [500, "D"], [400, "CD"],
-    [100, "C"], [90, "XC"], [50, "L"], [40, "XL"],
-    [10, "X"], [9, "IX"], [5, "V"], [4, "IV"],
-    [1, "I"]
-  ];
+function romanToArabic(roman) {
+  const map = { I:1, V:5, X:10, L:50, C:100, D:500, M:1000 };
+  let result = 0;
+  let prev = 0;
 
-  let result = "";
+  for (let i = roman.length - 1; i >= 0; i--) {
+    const current = map[roman[i]];
 
-  for (const [value, numeral] of values) {
-    while (num >= value) {
-      result += numeral;
-      num -= value;
+    if (!current) return null; 
+
+    if (current < prev) {
+      // Resta
+      // pero validar que sea una resta válida
+      if (!isValidSubtractive(roman[i], roman[i+1])) return null;
+      result -= current;
+    } else {
+      result += current;
     }
+
+    prev = current;
   }
 
   return result;
+}
+
+function isValidSubtractive(a, b) {
+  const valid = {
+    I: ['V','X'],
+    X: ['L','C'],
+    C: ['D','M']
+  };
+
+  return valid[a] ? valid[a].includes(b) : false;
 }
