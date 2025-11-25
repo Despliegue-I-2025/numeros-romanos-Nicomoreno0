@@ -11,76 +11,53 @@ module.exports = function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { roman } = req.query;
+  const { arabic } = req.query;
 
-  if (!roman) {
-    return res.status(400).json({ error: 'Missing roman parameter' });
+  if (!arabic) {
+    return res.status(400).json({ error: 'Missing arabic parameter' });
   }
 
-  const romanUpper = roman.toUpperCase();
-
-  // Validar caracteres romanos básicos
-  const validRomanRegex = /^[MDCLXVI]+$/;
-  if (!validRomanRegex.test(romanUpper)) {
-    return res.status(400).json({ error: 'Invalid roman numeral format' });
+  // Validar que sea SOLO dígitos
+  if (!/^\d+$/.test(arabic)) {
+    return res.status(400).json({ error: 'Invalid arabic number format' });
   }
 
-  // Validar estructura romana correcta
-  if (!isValidRoman(romanUpper)) {
-    return res.status(400).json({ error: 'Invalid roman numeral' });
+  const num = parseInt(arabic, 10);
+
+  // Validar rango permitido
+  if (isNaN(num) || num < 1 || num > 3999) {
+    return res.status(400).json({ error: 'Invalid arabic number (must be 1-3999)' });
   }
 
-  const arabic = romanToArabic(romanUpper);
+  const roman = arabicToRoman(num);
 
-  if (arabic < 1 || arabic > 3999) {
-    return res.status(400).json({ error: 'Invalid roman numeral' });
-  }
-
-  return res.status(200).json({ arabic });
+  return res.status(200).json({ roman });
 };
 
-function isValidRoman(roman) {
-  // Repeticiones inválidas
-  if (/I{4,}|X{4,}|C{4,}|M{4,}/.test(roman)) {
-    return false;
-  }
+function arabicToRoman(num) {
+  const values = [
+    [1000, 'M'],
+    [900, 'CM'],
+    [500, 'D'],
+    [400, 'CD'],
+    [100, 'C'],
+    [90, 'XC'],
+    [50, 'L'],
+    [40, 'XL'],
+    [10, 'X'],
+    [9, 'IX'],
+    [5, 'V'],
+    [4, 'IV'],
+    [1, 'I']
+  ];
 
-  if (/V{2,}|L{2,}|D{2,}/.test(roman)) {
-    return false;
-  }
+  let result = '';
 
-  // Sustracciones inválidas
-  if (/IL|IC|ID|IM/.test(roman)) return false; // I solo resta a V y X
-  if (/XD|XM/.test(roman)) return false;       // X solo resta a L y C
-  if (/VX|VL|VC|VD|VM|LC|LD|LM|DM/.test(roman)) return false; // V, L, D no restan
-
-  return true;
-}
-
-function romanToArabic(roman) {
-  const values = {
-    M: 1000,
-    D: 500,
-    C: 100,
-    L: 50,
-    X: 10,
-    V: 5,
-    I: 1
-  };
-
-  let result = 0;
-  let prevValue = 0;
-
-  for (let i = roman.length - 1; i >= 0; i--) {
-    const currentValue = values[roman[i]];
-
-    if (currentValue < prevValue) {
-      result -= currentValue;
-    } else {
-      result += currentValue;
+  for (let i = 0; i < values.length; i++) {
+    while (num >= values[i][0]) {
+      result += values[i][1];
+      num -= values[i][0];
     }
-
-    prevValue = currentValue;
   }
 
   return result;
