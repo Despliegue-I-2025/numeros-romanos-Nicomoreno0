@@ -1,63 +1,67 @@
-// api/r2a.js
+module.exports = function handler(req, res) {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-export default function handler(req, res) {
-  if (req.method !== "GET") {
-    return res.status(405).json({ error: "Método no permitido" });
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
   }
 
-  const value = req.query.value;
-
-  // 1) Validación: vacío
-  if (!value || value.trim() === "") {
-    return res.status(400).json({ error: "Formato inválido: vacío" });
+  if (req.method !== 'GET') {
+    return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const romano = value.toUpperCase().trim();
+  const { roman } = req.query;
 
-  // 2) Validación: SOLO caracteres romanos válidos
-  if (!/^[MDCLXVI]+$/.test(romano)) {
-    return res.status(400).json({ error: "Formato inválido" });
+  if (!roman) {
+    return res.status(400).json({ error: 'Missing roman parameter' });
   }
 
-  // 3) Validaciones de estructura NO permitidas (prohibidas por el estándar)
-  const invalidPatterns = [
-    /IIII/, /VV/, /XXXX/, /LL/, /CCCC/, /DD/, /MMMM/,
-    /IL/, /IC/, /ID/, /IM/,
-    /XD/, /XM/, /VX/, /LC/, /DM/
-  ];
+  const romanUpper = roman.toUpperCase();
 
-  for (const p of invalidPatterns) {
-    if (p.test(romano)) {
-      return res.status(400).json({ error: "Estructura inválida" });
-    }
+  // Validar solo caracteres permitidos
+  if (!/^[MDCLXVI]+$/.test(romanUpper)) {
+    return res.status(400).json({ error: 'Invalid roman numeral format' });
   }
 
-  // Mapa de valores romanos
-  const valores = {
-    I: 1, V: 5, X: 10, L: 50,
-    C: 100, D: 500, M: 1000
+  // Validación correcta para números romanos reales
+  const validRomanPattern =
+    /^M{0,3}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$/;
+
+  if (!validRomanPattern.test(romanUpper)) {
+    return res.status(400).json({ error: 'Invalid roman numeral' });
+  }
+
+  const arabic = romanToArabic(romanUpper);
+
+  return res.status(200).json({ arabic });
+};
+
+function romanToArabic(roman) {
+  const values = {
+    M: 1000,
+    D: 500,
+    C: 100,
+    L: 50,
+    X: 10,
+    V: 5,
+    I: 1,
   };
 
-  let total = 0;
-  let anterior = 0;
+  let result = 0;
+  let prevValue = 0;
 
-  for (let i = romano.length - 1; i >= 0; i--) {
-    const letra = romano[i];
-    const valor = valores[letra];
+  for (let i = roman.length - 1; i >= 0; i--) {
+    const currentValue = values[roman[i]];
 
-    if (valor < anterior) {
-      // Validación de restas permitidas:
-      const par = letra + romano[i + 1];
-      const validas = ["IV", "IX", "XL", "XC", "CD", "CM"];
-      if (!validas.includes(par)) {
-        return res.status(400).json({ error: "Sustracción inválida" });
-      }
-      total -= valor;
+    if (currentValue < prevValue) {
+      result -= currentValue;
     } else {
-      total += valor;
-      anterior = valor;
+      result += currentValue;
     }
+
+    prevValue = currentValue;
   }
 
-  return res.status(200).json({ arabigo: total });
+  return result;
 }
