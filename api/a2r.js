@@ -1,96 +1,58 @@
-const express = require('express');
-const router = express.Router();
+module.exports = function handler(req, res) {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-// Función para convertir número a romano
-function convertirARomano(numero) {
-    const valores = [
-        { valor: 1000, romano: 'M' },
-        { valor: 900, romano: 'CM' },
-        { valor: 500, romano: 'D' },
-        { valor: 400, romano: 'CD' },
-        { valor: 100, romano: 'C' },
-        { valor: 90, romano: 'XC' },
-        { valor: 50, romano: 'L' },
-        { valor: 40, romano: 'XL' },
-        { valor: 10, romano: 'X' },
-        { valor: 9, romano: 'IX' },
-        { valor: 5, romano: 'V' },
-        { valor: 4, romano: 'IV' },
-        { valor: 1, romano: 'I' }
-    ];
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
 
-    let resultado = '';
-    let num = numero;
+  if (req.method !== 'GET') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
 
-    for (const { valor, romano } of valores) {
-        while (num >= valor) {
-            resultado += romano;
-            num -= valor;
-        }
+  const { arabic } = req.query;
+
+  if (!arabic) {
+    return res.status(400).json({ error: 'Missing arabic parameter' });
+  }
+
+  const num = parseInt(arabic, 10);
+
+  if (isNaN(num) || num < 1 || num > 3999) {
+    return res.status(400).json({ error: 'Invalid arabic number (must be 1-3999)' });
+  }
+
+  const roman = arabicToRoman(num);
+
+  return res.status(200).json({ roman });
+};
+
+function arabicToRoman(num) {
+  const values = [
+    [1000, 'M'],
+    [900, 'CM'],
+    [500, 'D'],
+    [400, 'CD'],
+    [100, 'C'],
+    [90, 'XC'],
+    [50, 'L'],
+    [40, 'XL'],
+    [10, 'X'],
+    [9, 'IX'],
+    [5, 'V'],
+    [4, 'IV'],
+    [1, 'I']
+  ];
+
+  let result = '';
+
+  for (let i = 0; i < values.length; i++) {
+    while (num >= values[i][0]) {
+      result += values[i][1];
+      num -= values[i][0];
     }
+  }
 
-    return resultado;
+  return result;
 }
-
-// Ruta GET /a2r - Convierte número arábigo a romano
-router.get('/', (req, res) => {
-    const numero = req.query.numero;
-    
-    // Validar que el parámetro existe
-    if (!numero) {
-        return res.status(400).json({
-            error: 'Parámetro requerido',
-            mensaje: 'El parámetro "numero" es requerido'
-        });
-    }
-    
-    // Validar que es un string
-    if (typeof numero !== 'string') {
-        return res.status(400).json({
-            error: 'Formato inválido',
-            mensaje: 'El parámetro tiene un formato inválido'
-        });
-    }
-    
-    // Validar que contiene solo dígitos
-    if (!/^\d+$/.test(numero)) {
-        return res.status(400).json({
-            error: 'Formato inválido',
-            mensaje: 'El parámetro debe contener solo números enteros'
-        });
-    }
-    
-    // Convertir a número y validar
-    const num = parseInt(numero, 10);
-    if (isNaN(num)) {
-        return res.status(400).json({
-            error: 'Formato inválido',
-            mensaje: 'El parámetro no es un número válido'
-        });
-    }
-    
-    // Validar rango para números romanos (1-3999)
-    if (num < 1 || num > 3999) {
-        return res.status(400).json({
-            error: 'Rango inválido',
-            mensaje: 'El número debe estar entre 1 y 3999'
-        });
-    }
-    
-    try {
-        const romano = convertirARomano(num);
-        
-        res.status(200).json({
-            numero: num,
-            romano: romano,
-            conversion: 'arabe a romano'
-        });
-    } catch (error) {
-        res.status(500).json({
-            error: 'Error interno del servidor',
-            mensaje: 'Ocurrió un error durante la conversión'
-        });
-    }
-});
-
-module.exports = router;
