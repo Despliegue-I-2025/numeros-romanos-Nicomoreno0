@@ -1,17 +1,17 @@
 {
-  "name": "numeros-romanos",
+  "name": "numero5-romanos",
   "version": "1.0.0",
-  "description": "Conversor de números romanos a arábigos y viceversa",
-  "main": "index.js",
+  "description": "API para conversión entre números arábigos y romanos",
+  "main": "romanos.js",
   "scripts": {
-    "start": "vercel dev",
-    "dev": "vercel dev"
+    "start": "node romanos.js",
+    "dev": "nodemon romanos.js",
+    "test": "node test/romanos.test.js"
   },
   "dependencies": {
-    "@vercel/node": "^4.0.0",
-    "express": "^4.21.2"
+    "express": "^4.18.2"
   },
-  "engines": {
-    "node": ">=14.x"
+  "devDependencies": {
+    "nodemon": "^3.0.1"
   }
 }
