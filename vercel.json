@@ -2,8 +2,6 @@
   "version": 2,
   "routes": [
     { "src": "/r2a", "dest": "/api/r2a.js" },
-    { "src": "/a2r", "dest": "/api/a2r.js" },
-    { "src": "/", "dest": "/index.html" },
-    { "src": "/(.*)", "dest": "/404.html", "status": 404 }
+    { "src": "/a2r", "dest": "/api/a2r.js" }
   ]
 }
