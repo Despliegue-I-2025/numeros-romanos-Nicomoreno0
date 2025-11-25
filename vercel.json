@@ -1,17 +1,12 @@
 {
   "version": 2,
   "builds": [
-    { "src": "api/r2a.js", "use": "@vercel/node" },
     { "src": "api/a2r.js", "use": "@vercel/node" },
-    { 
-      "src": "public/index.html", 
-      "use": "@vercel/static",
-      "config": { "output": "public" }
-    }
+    { "src": "api/r2a.js", "use": "@vercel/node" }
   ],
   "routes": [
-    { "src": "/r2a", "dest": "/api/r2a" },
-    { "src": "/a2r", "dest": "/api/a2r" },
+    { "src": "/a2r", "dest": "/api/a2r.js" },
+    { "src": "/r2a", "dest": "/api/r2a.js" },
     { "src": "/", "dest": "/public/index.html" },
     { "src": "/(.*)", "status": 404, "dest": "/public/404.html" }
   ]
