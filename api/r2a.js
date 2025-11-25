@@ -1,66 +1,54 @@
 module.exports = function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
-  if (req.method === 'OPTIONS') {
+  if (req.method === "OPTIONS") {
     return res.status(200).end();
   }
 
-  if (req.method !== 'GET') {
-    return res.status(405).json({ error: 'Method not allowed' });
+  if (req.method !== "GET") {
+    return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const { roman } = req.query;
+  const { arabic } = req.query;
 
-  if (!roman) {
-    return res.status(400).json({ error: 'Missing roman parameter' });
+  // Verificar que exista
+  if (!arabic) {
+    return res.status(400).json({ error: "Missing arabic parameter" });
   }
 
-  const romanUpper = roman.toUpperCase();
-
-  // Validar solo caracteres permitidos
-  if (!/^[MDCLXVI]+$/.test(romanUpper)) {
-    return res.status(400).json({ error: 'Invalid roman numeral format' });
+  // Validar que sea SOLO dígitos → RECHAZA: 12abc, abc, -5, 12.5
+  if (!/^\d+$/.test(arabic)) {
+    return res.status(400).json({ error: "Invalid arabic number format" });
   }
 
-  // Validación correcta para números romanos reales
-  const validRomanPattern =
-    /^M{0,3}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$/;
+  const num = parseInt(arabic, 10);
 
-  if (!validRomanPattern.test(romanUpper)) {
-    return res.status(400).json({ error: 'Invalid roman numeral' });
+  // Validar rango
+  if (num < 1 || num > 3999) {
+    return res.status(400).json({ error: "Invalid arabic number (must be 1-3999)" });
   }
 
-  const arabic = romanToArabic(romanUpper);
-
-  return res.status(200).json({ arabic });
+  const roman = arabicToRoman(num);
+  return res.status(200).json({ roman });
 };
 
-function romanToArabic(roman) {
-  const values = {
-    M: 1000,
-    D: 500,
-    C: 100,
-    L: 50,
-    X: 10,
-    V: 5,
-    I: 1,
-  };
+function arabicToRoman(num) {
+  const values = [
+    [1000, "M"], [900, "CM"], [500, "D"], [400, "CD"],
+    [100, "C"], [90, "XC"], [50, "L"], [40, "XL"],
+    [10, "X"], [9, "IX"], [5, "V"], [4, "IV"],
+    [1, "I"]
+  ];
 
-  let result = 0;
-  let prevValue = 0;
+  let result = "";
 
-  for (let i = roman.length - 1; i >= 0; i--) {
-    const currentValue = values[roman[i]];
-
-    if (currentValue < prevValue) {
-      result -= currentValue;
-    } else {
-      result += currentValue;
+  for (const [value, numeral] of values) {
+    while (num >= value) {
+      result += numeral;
+      num -= value;
     }
-
-    prevValue = currentValue;
   }
 
   return result;
