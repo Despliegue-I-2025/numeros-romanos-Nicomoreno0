@@ -1,49 +1,57 @@
-// api/r2a.js
 export default function handler(req, res) {
-  // CORS
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-
-  if (req.method === "OPTIONS") {
-    return res.status(200).end();
-  }
-
-  const { roman } = req.query;
+  const roman = req.query.value;
 
   if (!roman || typeof roman !== "string") {
-    return res.status(400).json({ error: "Invalid or missing roman parameter" });
+    return res.status(400).json({ error: "Missing value" });
   }
 
-  const map = {
-    M: 1000,
-    D: 500,
-    C: 100,
-    L: 50,
-    X: 10,
-    V: 5,
-    I: 1
-  };
+  const value = roman.toUpperCase();
 
-  const str = roman.toUpperCase();
-  let total = 0;
+  // Validar solo caracteres permitidos
+  if (!/^[IVXLCDM]+$/.test(value)) {
+    return res.status(400).json({ error: "Invalid characters" });
+  }
 
-  for (let i = 0; i < str.length; i++) {
-    const curr = map[str[i]];
-    const next = map[str[i + 1]];
+  // Validar repeticiones
+  if (/IIII|XXXX|CCCC|MMMM/.test(value)) {
+    return res.status(400).json({ error: "Too many repetitions" });
+  }
 
-    // Si alguna letra no es romana → error
-    if (!curr) {
-      return res.status(400).json({ error: "Invalid roman numeral" });
+  // Validar repeticiones de V, L, D (no pueden repetirse)
+  if (/VV|LL|DD/.test(value)) {
+    return res.status(400).json({ error: "Invalid repetition" });
+  }
+
+  // Validar sustracciones válidas
+  const invalidSubtractions = [
+    "IL", "IC", "ID", "IM",
+    "XD", "XM",
+    "VX", "VL", "VC", "VD", "VM",
+    "LC", "LD", "LM",
+    "DM"
+  ];
+
+  for (const inv of invalidSubtractions) {
+    if (value.includes(inv)) {
+      return res.status(400).json({ error: "Invalid subtraction" });
     }
+  }
 
-    if (next && next > curr) {
-      total += next - curr;
+  // Conversión
+  const map = { I:1, V:5, X:10, L:50, C:100, D:500, M:1000 };
+  let result = 0;
+
+  for (let i = 0; i < value.length; i++) {
+    const current = map[value[i]];
+    const next = map[value[i+1]];
+
+    if (next && current < next) {
+      result += next - current;
       i++;
     } else {
-      total += curr;
+      result += current;
     }
   }
 
-  return res.status(200).json({ arabic: total });
+  return res.status(200).json({ result });
 }
