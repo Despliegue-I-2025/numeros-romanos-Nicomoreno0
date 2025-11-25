@@ -1,59 +1,54 @@
-module.exports = function handler(req, res) {
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+// api/a2r.js
 
-  if (req.method === "OPTIONS") {
-    return res.status(200).end();
-  }
-
+export default function handler(req, res) {
   if (req.method !== "GET") {
-    return res.status(405).json({ error: "Method not allowed" });
+    return res.status(405).json({ error: "Método no permitido" });
   }
 
-  const { roman } = req.query;
+  const value = req.query.value;
 
-  if (!roman) {
-    return res.status(400).json({ error: "Missing roman parameter" });
+  // 1) Validación: debe existir
+  if (!value) {
+    return res.status(400).json({ error: "Falta el parámetro 'value'" });
   }
 
-  const upper = roman.toUpperCase();
-
-  // Regex oficial para validar romanos (1–3999)
-  const validRoman =
-    /^(M{0,3})(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$/;
-
-  if (!validRoman.test(upper)) {
-    return res.status(400).json({ error: "Invalid roman numeral format" });
+  // 2) Validación: debe ser SOLO NÚMEROS (sin letras)
+  if (!/^\d+$/.test(value)) {
+    return res.status(400).json({ error: "Formato inválido: solo números" });
   }
 
-  return res.status(200).json({ arabic: romanToArabic(upper) });
-};
+  const num = parseInt(value, 10);
 
-function romanToArabic(roman) {
-  const values = {
-    M: 1000,
-    D: 500,
-    C: 100,
-    L: 50,
-    X: 10,
-    V: 5,
-    I: 1
-  };
+  if (num <= 0) {
+    return res.status(400).json({ error: "El número debe ser mayor que 0" });
+  }
 
-  let total = 0;
+  // Conversión de arábigo a romano
+  const map = [
+    { val: 1000, rom: "M" },
+    { val: 900, rom: "CM" },
+    { val: 500, rom: "D" },
+    { val: 400, rom: "CD" },
+    { val: 100, rom: "C" },
+    { val: 90, rom: "XC" },
+    { val: 50, rom: "L" },
+    { val: 40, rom: "XL" },
+    { val: 10, rom: "X" },
+    { val: 9, rom: "IX" },
+    { val: 5, rom: "V" },
+    { val: 4, rom: "IV" },
+    { val: 1, rom: "I" }
+  ];
 
-  for (let i = 0; i < roman.length; i++) {
-    const curr = values[roman[i]];
-    const next = values[roman[i + 1]];
+  let resultado = "";
+  let n = num;
 
-    if (next && next > curr) {
-      total += next - curr;
-      i++; 
-    } else {
-      total += curr;
+  for (const { val, rom } of map) {
+    while (n >= val) {
+      resultado += rom;
+      n -= val;
     }
   }
 
-  return total;
+  return res.status(200).json({ romano: resultado });
 }
