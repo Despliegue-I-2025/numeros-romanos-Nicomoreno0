@@ -18,10 +18,16 @@ module.exports = function handler(req, res) {
   }
 
   const romanUpper = roman.toUpperCase();
-  const validRomanRegex = /^[MDCLXVI]+$/;
 
+  // Validar solo caracteres romanos válidos
+  const validRomanRegex = /^[MDCLXVI]+$/;
   if (!validRomanRegex.test(romanUpper)) {
     return res.status(400).json({ error: 'Invalid roman numeral format' });
+  }
+
+  // Validar patrón romano correcto
+  if (!isValidRoman(romanUpper)) {
+    return res.status(400).json({ error: 'Invalid roman numeral' });
   }
 
   const arabic = romanToArabic(romanUpper);
@@ -32,6 +38,14 @@ module.exports = function handler(req, res) {
 
   return res.status(200).json({ arabic });
 };
+
+function isValidRoman(roman) {
+  // Valida repeticiones y sustracciones correctas
+  const validPattern =
+    /^M{0,3}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$/;
+
+  return validPattern.test(roman);
+}
 
 function romanToArabic(roman) {
   const values = {
